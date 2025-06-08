@@ -80,6 +80,7 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [horizonReachedMessageVisible, setHorizonReachedMessageVisible] = useState<boolean>(false);
   const [showHorizonFlash, setShowHorizonFlash] = useState<boolean>(false); 
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const lastWarningDistanceRef = useRef<number>(MAX_SIMULATED_DISTANCE_KM);
   const ambientSoundPlayedRef = useRef(false);
@@ -352,8 +353,57 @@ const App: React.FC = () => {
     }
   }, [esp32Device]);
 
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch((err) => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+      });
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen().catch((err) => {
+        console.error(`Error attempting to exit fullscreen: ${err.message}`);
+      });
+      setIsFullscreen(false);
+    }
+  };
+
   return (
     <div className="flex flex-row h-screen bg-black text-cyan-300 font-orbitron overflow-hidden">
+      {/* Fullscreen button */}
+      <button
+        onClick={toggleFullscreen}
+        style={{
+          position: 'fixed',
+          top: '15px',
+          right: '15px',
+          background: 'rgba(0, 0, 0, 0.3)',
+          border: '1px solid rgba(0, 255, 255, 0.2)',
+          borderRadius: '4px',
+          width: '40px',
+          height: '40px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          zIndex: 2000,
+          color: '#00ffff',
+          opacity: 0.85,
+          transition: 'opacity 0.2s, transform 0.2s',
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+        onMouseLeave={(e) => e.currentTarget.style.opacity = '0.85'}
+        title="Alternar pantalla completa"
+      >
+        {isFullscreen ? (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M5.5 0a.5.5 0 0 1 .5.5v4A1.5 1.5 0 0 1 4.5 6h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5zm5 0a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 10 4.5v-4a.5.5 0 0 1 .5-.5zM0 10.5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 6 11.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zm10 1a1.5 1.5 0 0 1 1.5-1.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4z"/>
+          </svg>
+        ) : (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1h-4zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zM.5 10a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5z"/>
+          </svg>
+        )}
+      </button>
       {/* Left Panel Container */}
       <div className="w-2/5 h-screen overflow-y-auto bg-gray-900 bg-opacity-95 border-r-2 border-cyan-600 border-glow p-3 md:p-4">
         <ControlPanel
