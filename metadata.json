@@ -1,0 +1,6 @@
+
+{
+  "name": "Black Hole Proximity Simulator",
+  "description": "A React application that simulates approaching a black hole, visualizing gravitational effects and time dilation. It can optionally connect to an ESP32 via Bluetooth to use a distance sensor for controlling the simulation.",
+  "requestFramePermissions": ["bluetooth"]
+}
