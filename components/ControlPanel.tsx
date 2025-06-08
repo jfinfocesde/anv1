@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { SimulationState } from '../types';
 import { MAX_SIMULATED_DISTANCE_KM, MIN_SIMULATED_DISTANCE_KM } from '../constants';
@@ -24,14 +25,14 @@ const formatChronometerTime = (totalSeconds: number | undefined): string => {
 const DataField: React.FC<{ label: string; value: string | number; unit?: string; customClass?: string; valueClass?: string }> = ({ label, value, unit, customClass, valueClass }) => (
   <div className={`mb-2 p-2 rounded-md bg-gray-800 bg-opacity-70 border border-cyan-700 ${customClass || 'border-glow'}`}>
     <span className="block text-xs text-cyan-500 uppercase tracking-wider">{label}</span>
-    <span className={`block text-xl font-bold ${valueClass || 'text-glow'}`}>
+    <span className={`block text-2xl font-bold ${valueClass || 'text-glow'}`}>
       {typeof value === 'number' && !Number.isInteger(value) ? value.toFixed(value > 1000 ? 0 : (value < 100 ? 2 : 1) ) : value} {unit}
     </span>
   </div>
 );
 
 const getTimeDilationStyles = (factor: number): { dataFieldClass: string; valueClass: string; textColorClass: string } => {
-  if (factor >= 4900) return { dataFieldClass: 'border-purple-500', valueClass: 'text-purple-300 text-glow-purple animate-pulse', textColorClass: 'text-purple-300' }; // For horizon
+  if (factor >= 4900) return { dataFieldClass: 'border-purple-500', valueClass: 'text-purple-300 text-glow-purple animate-pulse', textColorClass: 'text-purple-300' };
   if (factor > 1000) return { dataFieldClass: 'border-red-600', valueClass: 'text-red-400 text-glow-red', textColorClass: 'text-red-400' };
   if (factor > 100) return { dataFieldClass: 'border-orange-500', valueClass: 'text-orange-400 text-glow-orange', textColorClass: 'text-orange-400' }; 
   if (factor > 10) return { dataFieldClass: 'border-yellow-500', valueClass: 'text-yellow-400 text-glow-yellow', textColorClass: 'text-yellow-400' };
@@ -84,10 +85,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
 
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 p-3 md:p-5 bg-black bg-opacity-80 border-t-2 border-cyan-600 border-glow z-20">
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 items-start">
+    <div className="h-full flex flex-col"> {/* Removed absolute positioning and related styles. Padding/bg handled by parent in App.tsx */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start"> {/* Adjusted grid for sidebar layout */}
         
-        <div className="md:col-span-1">
+        <div> 
           <h2 className="text-lg text-cyan-400 mb-2 uppercase tracking-wider">SISTEMA</h2>
           <DataField 
             label="Bluetooth" 
@@ -118,7 +119,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           )}
         </div>
 
-        <div className="md:col-span-1">
+        <div> 
           <h2 className="text-lg text-cyan-400 mb-2 uppercase tracking-wider">NAVEGACIÓN</h2>
           <DataField 
             label="Distancia al Event Horizon" 
@@ -150,7 +151,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           </div>
         </div>
         
-        <div className="md:col-span-1">
+        {/* On smaller views of the panel, Cronómetros and Relatividad will stack below Sistema and Navegación */}
+        <div> 
             <h2 className="text-lg text-cyan-400 mb-2 uppercase tracking-wider">CRONÓMETROS</h2>
             <DataField
                 label="Tiempo de Misión (Observador)"
@@ -165,13 +167,13 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             />
         </div>
 
-        <div className="md:col-span-1">
+        <div> 
           <h2 className="text-lg text-cyan-400 mb-2 uppercase tracking-wider">RELATIVIDAD</h2>
           <DataField 
             label="Factor Dilatación Temporal" 
             value={formatTimeDilationFactor(timeDilationFactor)} 
             customClass={timeDilationStyles.dataFieldClass}
-            valueClass={timeDilationStyles.valueClass}
+            valueClass={timeDilationStyles.valueClass} 
           />
            {timeDilationClarificationText && (
             <p className={`mt-1 text-xs ${timeDilationStyles.textColorClass}`}>{timeDilationClarificationText}</p>
@@ -185,21 +187,22 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
              "Continuo espacio-tiempo nominal."}
           </p>
         </div>
-        
-        {/* Conditional Alert Area */}
+      </div>
+      
+      <div className="mt-3 space-y-3">
         {horizonReachedMessageVisible ? (
-           <div className="col-span-full p-3 bg-purple-900 bg-opacity-80 rounded-md border-2 border-purple-500 text-center animate-pulse" role="alert">
+           <div className="w-full p-3 bg-purple-900 bg-opacity-80 rounded-md border-2 border-purple-500 text-center animate-pulse" role="alert">
             <h3 className="text-2xl md:text-3xl text-purple-200 font-bold text-glow-purple uppercase">!!! HORIZONTE DE SUCESOS ALCANZADO !!!</h3>
             <p className="text-purple-100 text-md md:text-lg mt-1">Punto de no retorno. El tiempo se ha detenido efectivamente para un observador externo.</p>
           </div>
         ) : isCriticalDistance && (
-          <div className="col-span-full md:col-span-1 p-3 bg-red-900 bg-opacity-80 rounded-md border-2 border-red-500" role="alert"> {/* This one can stay md:col-span-1 if it's a lesser alert */}
-            <h3 className="text-xl text-red-300 font-bold text-glow-red animate-pulse">!!! ADVERTENCIA CRÍTICA !!!</h3>
-            <p className="text-red-200 text-sm mt-1">Niveles de proximidad peligrosos. Flujo de tiempo severamente distorsionado.</p>
+          <div className="w-full p-3 bg-red-900 bg-opacity-80 rounded-md border-2 border-red-500 text-center" role="alert">
+            <h3 className="text-xl md:text-2xl text-red-300 font-bold text-glow-red animate-pulse">!!! ADVERTENCIA CRÍTICA !!!</h3>
+            <p className="text-red-200 text-sm md:text-base mt-1">Niveles de proximidad peligrosos. Flujo de tiempo severamente distorsionado.</p>
           </div>
         )}
-
       </div>
+
     </div>
   );
 };

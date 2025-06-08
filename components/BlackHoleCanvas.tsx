@@ -169,12 +169,10 @@ export const BlackHoleCanvas: React.FC<BlackHoleCanvasProps> = ({
       const startX = shipSize * 2.5; 
       const endX = bhCenterX - diskOuterRadius - shipSize * 2; 
 
-      // Easing for ship movement (accelerates towards the black hole)
-      const progressTowardsBH = 1.0 - normalizedVisualDistance; // 0 (far) to 1 (close)
-      const easedProgress = Math.pow(progressTowardsBH, 2.2); // Power > 1 for acceleration
+      const progressTowardsBH = 1.0 - normalizedVisualDistance; 
+      const easedProgress = Math.pow(progressTowardsBH, 2.2); 
       const shipX = startX * (1.0 - easedProgress) + endX * easedProgress;
       
-      // Subtle vertical bobbing
       const bobbingAmplitude = shipSize * 0.15;
       const bobbingFrequency = 0.7;
       const shipVerticalBob = Math.sin(pulseOffsetRef.current * bobbingFrequency) * bobbingAmplitude;
@@ -185,7 +183,7 @@ export const BlackHoleCanvas: React.FC<BlackHoleCanvasProps> = ({
 
       if (isApproaching && spaceshipSpeed > trailSpeedThreshold) {
         shipTrailRef.current.push({ 
-            x: shipX - shipSize * 0.6, // Trail starts from back of ship
+            x: shipX - shipSize * 0.6, 
             y: shipY, 
             opacity: 0.8 + normalizedSpeed * 0.2, 
             size: shipSize * (0.6 + normalizedSpeed * 0.4)
@@ -194,12 +192,11 @@ export const BlackHoleCanvas: React.FC<BlackHoleCanvasProps> = ({
       
       ctx.save();
       shipTrailRef.current.forEach((p, index) => {
-        p.opacity -= 0.06; // Fade out faster
+        p.opacity -= 0.06; 
         p.size *= 0.96; 
         if (p.opacity > 0 && p.size > 1) {
           ctx.globalAlpha = p.opacity;
           ctx.beginPath();
-          // Make trail particles more elongated/streamlined
           ctx.moveTo(p.x + p.size * 0.5, p.y); 
           ctx.lineTo(p.x - p.size * 1.5, p.y - p.size * 0.3);
           ctx.lineTo(p.x - p.size * 1.5, p.y + p.size * 0.3);
@@ -219,7 +216,7 @@ export const BlackHoleCanvas: React.FC<BlackHoleCanvasProps> = ({
       ctx.save();
       ctx.translate(shipX, shipY);
       
-      const shakeIntensityBase = (timeDilationFactor -1) / 400; // Increased sensitivity
+      const shakeIntensityBase = (timeDilationFactor -1) / 400; 
       const shakeIntensity = Math.min(10, shakeIntensityBase); 
       if (timeDilationFactor > 1.2) { 
         const shakeX = (Math.random() - 0.5) * shakeIntensity;
@@ -227,14 +224,13 @@ export const BlackHoleCanvas: React.FC<BlackHoleCanvasProps> = ({
         ctx.translate(shakeX, shakeY);
       }
 
-      // Engine Flare
       if (isApproaching && spaceshipSpeed > trailSpeedThreshold) {
         const flareLength = shipSize * (1.0 + normalizedSpeed * 2.5) * (1.0 + (1.0-normalizedVisualDistance) * 1.5);
         const flareWidth = shipSize * (0.4 + normalizedSpeed * 0.3);
-        const flarePulse = (Math.sin(pulseOffsetRef.current * 3) + 1) / 2; // Brighter pulse
+        const flarePulse = (Math.sin(pulseOffsetRef.current * 3) + 1) / 2; 
 
         ctx.beginPath();
-        ctx.moveTo(-shipSize / 2, 0); // Back center of ship
+        ctx.moveTo(-shipSize / 2, 0); 
         ctx.lineTo(-shipSize / 2 - flareLength, -flareWidth / 2 + flarePulse * flareWidth * 0.2);
         ctx.lineTo(-shipSize / 2 - flareLength, flareWidth / 2 - flarePulse * flareWidth * 0.2);
         ctx.closePath();
@@ -256,7 +252,7 @@ export const BlackHoleCanvas: React.FC<BlackHoleCanvasProps> = ({
       ctx.lineTo(-shipSize / 2, -shipSize / 2);
       ctx.lineTo(-shipSize / 2, shipSize / 2);
       ctx.closePath();
-      ctx.fillStyle = '#0ff'; // Brighter ship color
+      ctx.fillStyle = '#0ff'; 
       ctx.fill();
 
       if (timeDilationFactor > 500) {
@@ -273,7 +269,7 @@ export const BlackHoleCanvas: React.FC<BlackHoleCanvasProps> = ({
         ctx.fill();
       }
 
-      ctx.strokeStyle = '#ccffff'; // Brighter outline
+      ctx.strokeStyle = '#ccffff'; 
       ctx.lineWidth = 1.5;
       ctx.stroke();
       ctx.restore();
@@ -301,9 +297,8 @@ export const BlackHoleCanvas: React.FC<BlackHoleCanvasProps> = ({
         }
       });
       
-      // New Horizon Flash Effect
       if (showHorizonFlash) {
-        ctx.fillStyle = 'rgba(180, 0, 255, 0.4)'; // Intense purple, semi-transparent
+        ctx.fillStyle = 'rgba(180, 0, 255, 0.4)'; 
         ctx.fillRect(0, 0, width, height);
       }
 
@@ -338,6 +333,6 @@ export const BlackHoleCanvas: React.FC<BlackHoleCanvasProps> = ({
   }, [distanceToBlackHole, timeDilationFactor, maxSimulatedDistanceKm, minSimulatedDistanceKm, spaceshipSpeed, isApproaching, showHorizonFlash]); 
 
   return (
-    <canvas ref={canvasRef} className="w-full h-full absolute top-0 left-0 z-0" />
+    <canvas ref={canvasRef} className="w-full h-full block z-0" />
   );
 };

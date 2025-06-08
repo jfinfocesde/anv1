@@ -7,14 +7,13 @@ import { SimulationState } from './types';
 import { 
   MAX_SIMULATED_DISTANCE_KM, 
   MIN_SIMULATED_DISTANCE_KM,
-  // MIN_SENSOR_DISTANCE_CM, // Physical sensor min, SENSOR_HORIZON_DISTANCE_CM is main sim min for logic below
-  SENSOR_HORIZON_DISTANCE_CM, // This is 5cm from constants.ts. This is the point for max dilation.
-  TARGET_SENSOR_MAX_DISTANCE_CM, // This will be 100cm from constants.ts
+  SENSOR_HORIZON_DISTANCE_CM, 
+  TARGET_SENSOR_MAX_DISTANCE_CM, 
   BASE_TIME_FLOW_RATE,
   SENSOR_DRIVEN_DILATION_CAP
 } from './constants';
 
-// Sound effect functions
+// Sound effect functions (unchanged)
 const playSound = (soundId: string, volume?: number) => {
   const sound = document.getElementById(soundId) as HTMLAudioElement;
   if (sound) {
@@ -23,8 +22,6 @@ const playSound = (soundId: string, volume?: number) => {
     if (sound.paused || sound.currentTime > 0 && sound.duration > 0 && sound.currentTime === sound.duration) { 
         sound.currentTime = 0; 
         sound.play().catch(e => console.warn(`Fallo al reproducir sonido ${soundId}:`, e));
-    } else {
-      // console.log(`Sonido ${soundId} ya se está reproduciendo o no está listo para reiniciar.`);
     }
   } else {
     console.warn(`Elemento de audio NO ENCONTRADO: ${soundId}. Asegúrate de que el ID es correcto y el elemento <audio> existe en el HTML. También verifica que el archivo de sonido existe en 'public/sounds/'.`);
@@ -41,13 +38,11 @@ const manageLoopingSound = (soundId: string, condition: boolean, volume?: number
         sound.play().catch(e => console.warn(`Fallo al reproducir sonido en bucle ${soundId}:`, e));
       } else { 
         if (volume !== undefined && sound.volume !== Math.max(0, Math.min(1, volume))) {
-            // console.log(`Ajustando volumen de sonido en bucle ${soundId} a ${volume}`);
             sound.volume = Math.max(0, Math.min(1, volume));
         }
       }
     } else {
       if (!sound.paused) {
-        // console.log(`Pausando sonido en bucle: ${soundId}`);
         sound.pause();
       }
     }
@@ -56,7 +51,6 @@ const manageLoopingSound = (soundId: string, condition: boolean, volume?: number
   }
 };
 
-
 const playStandardWarningSound = () => playSound('standardWarningSound');
 const playAmbientSound = () => {
     const sound = document.getElementById('ambientDroneSound') as HTMLAudioElement;
@@ -64,10 +58,6 @@ const playAmbientSound = () => {
         console.log("Intentando reproducir sonido ambiente inicial.");
         sound.volume = 0.3; 
         sound.play().catch(e => console.warn(`Fallo al reproducir sonido ambiente:`, e));
-    } else if (sound && !sound.paused) {
-        // console.log("Sonido ambiente ya se está reproduciendo.");
-    } else {
-        // console.warn("Elemento de audio para sonido ambiente no encontrado al inicio."); // Covered by diagnostic
     }
 };
 const playProximityAlertSound = (intensity: number) => {
@@ -102,7 +92,6 @@ const App: React.FC = () => {
   const lastFrameTimestampRef = useRef<number | null>(null);
   const prevDistanceToBlackHoleRef = useRef<number>(MAX_SIMULATED_DISTANCE_KM);
   
-  // Sound diagnostics useEffect
   useEffect(() => {
     console.log("--- Diagnóstico de Audio ---");
     const audioIds = [
@@ -150,7 +139,6 @@ const App: React.FC = () => {
       const currentDilationFactor = simulationState.timeDilationFactor;
       shipTimeRef.current += deltaTime / Math.max(BASE_TIME_FLOW_RATE, currentDilationFactor);
 
-
       setSimulationState(prev => ({
         ...prev,
         missionTimeSeconds: missionTimeRef.current,
@@ -179,30 +167,23 @@ const App: React.FC = () => {
     let horizonReachedThisUpdate = false;
 
     if (esp32Device && sensorDistance !== null) {
-      // Clamp sensorDistance to the effective range for simulation control
-      // e.g., if sensor reads 2cm, it's treated as SENSOR_HORIZON_DISTANCE_CM (5cm) for proximity calc.
-      // If sensor reads 150cm, it's treated as TARGET_SENSOR_MAX_DISTANCE_CM (100cm) for proximity calc.
       const rawClampedSensorVal = Math.max(SENSOR_HORIZON_DISTANCE_CM, Math.min(TARGET_SENSOR_MAX_DISTANCE_CM, sensorDistance));
       
-      const activeSensorMinForSim = SENSOR_HORIZON_DISTANCE_CM; // e.g., 5cm
-      const activeSensorMaxForSim = TARGET_SENSOR_MAX_DISTANCE_CM; // e.g., 100cm (now from constants)
-      const sensorRangeForSim = Math.max(1, activeSensorMaxForSim - activeSensorMinForSim); // e.g., 95cm
+      const activeSensorMinForSim = SENSOR_HORIZON_DISTANCE_CM; 
+      const activeSensorMaxForSim = TARGET_SENSOR_MAX_DISTANCE_CM; 
+      const sensorRangeForSim = Math.max(1, activeSensorMaxForSim - activeSensorMinForSim); 
       
-      // normalizedSensorProximity: 0 when sensor is at 100cm, 1 when sensor is at 5cm (or less)
-      // Uses rawClampedSensorVal which is already within [5cm, 100cm]
       const normalizedSensorProximity = 
         Math.max(0, Math.min(1, 
           (activeSensorMaxForSim - rawClampedSensorVal) / sensorRangeForSim
         ));
 
-      // Visual distance calculation (linear with proximity)
       displayDistanceKm = MAX_SIMULATED_DISTANCE_KM - normalizedSensorProximity * (MAX_SIMULATED_DISTANCE_KM - MIN_SIMULATED_DISTANCE_KM);
       
-      // New time dilation factor calculation
-      if (normalizedSensorProximity >= 1.0) { // At or beyond horizon point (e.g., 5cm or less)
+      if (normalizedSensorProximity >= 1.0) { 
           newTimeDilationFactor = SENSOR_DRIVEN_DILATION_CAP;
           horizonReachedThisUpdate = true; 
-          displayDistanceKm = MIN_SIMULATED_DISTANCE_KM; // Ensure visual distance is at min for horizon
+          displayDistanceKm = MIN_SIMULATED_DISTANCE_KM; 
       } else {
           let calculatedFactor = BASE_TIME_FLOW_RATE / (1 - normalizedSensorProximity);
           newTimeDilationFactor = Math.min(SENSOR_DRIVEN_DILATION_CAP, Math.max(BASE_TIME_FLOW_RATE, calculatedFactor));
@@ -219,7 +200,7 @@ const App: React.FC = () => {
         displayDistanceKm = horizonReachedThisUpdate ? MIN_SIMULATED_DISTANCE_KM : MAX_SIMULATED_DISTANCE_KM;
       }
 
-    } else { // No ESP32 or sensor data
+    } else { 
       newTimeDilationFactor = BASE_TIME_FLOW_RATE;
       displayDistanceKm = MAX_SIMULATED_DISTANCE_KM;
       horizonReachedThisUpdate = false;
@@ -227,19 +208,16 @@ const App: React.FC = () => {
 
     setHorizonReachedMessageVisible(horizonReachedThisUpdate);
 
-    // Flash effect logic
-    if (horizonReachedThisUpdate && !horizonAlreadyFlashedRef.current && esp32Device) { // Only flash if sensor is active
+    if (horizonReachedThisUpdate && !horizonAlreadyFlashedRef.current && esp32Device) { 
         setShowHorizonFlash(true);
         horizonAlreadyFlashedRef.current = true;
     } else if (!horizonReachedThisUpdate) {
         horizonAlreadyFlashedRef.current = false; 
     }
 
-
     currentSpeed = Math.abs(prevDistanceToBlackHoleRef.current - displayDistanceKm);
     approaching = displayDistanceKm < prevDistanceToBlackHoleRef.current;
     prevDistanceToBlackHoleRef.current = displayDistanceKm;
-
 
     setSimulationState(prev => ({
       ...prev,
@@ -249,7 +227,6 @@ const App: React.FC = () => {
       isApproaching: approaching,
     }));
 
-    // Sound Triggers
     const criticalDangerThresholdKm = MIN_SIMULATED_DISTANCE_KM * 10; 
     const warningThresholdKm = MIN_SIMULATED_DISTANCE_KM * 50;     
 
@@ -299,7 +276,7 @@ const App: React.FC = () => {
           setBluetoothStatus(`Conectado a ${device.name || 'ESP32_AgujeroNegro'}`);
           prevDistanceToBlackHoleRef.current = MAX_SIMULATED_DISTANCE_KM; 
           horizonAlreadyFlashedRef.current = false; 
-          setSensorDistance(null); // Reset sensor distance until first reading
+          setSensorDistance(null); 
           subscribeToDistanceUpdates((distanceCm) => {
             setSensorDistance(distanceCm);
           }, (e) => {
@@ -348,11 +325,9 @@ const App: React.FC = () => {
       console.log("Iniciando desconexión Bluetooth...");
       try {
         await disconnectESP32();
-        // The onDisconnected callback from connectToESP32 should handle state cleanup.
       } catch (err: any) {
         setError(`Error de desconexión: ${err.message}`);
         setBluetoothStatus('Error General');
-         // Fallback cleanup if gatt.disconnect doesn't trigger callback immediately or reliably
          setEsp32Device(null);
          setBluetoothStatus('Desconectado');
          setSensorDistance(null); 
@@ -379,29 +354,38 @@ const App: React.FC = () => {
   }, [esp32Device]);
 
   return (
-    <div className="flex flex-col h-screen bg-black text-cyan-300 font-orbitron relative overflow-hidden">
-      <BlackHoleCanvas
-        distanceToBlackHole={simulationState.distanceToBlackHole}
-        timeDilationFactor={simulationState.timeDilationFactor}
-        maxSimulatedDistanceKm={MAX_SIMULATED_DISTANCE_KM}
-        minSimulatedDistanceKm={MIN_SIMULATED_DISTANCE_KM}
-        spaceshipSpeed={simulationState.spaceshipSpeed}
-        isApproaching={simulationState.isApproaching}
-        showHorizonFlash={showHorizonFlash} 
-      />
-      <div className="absolute top-0 left-0 right-0 p-4 bg-black bg-opacity-50 z-10">
-        <h1 className="text-3xl md:text-4xl text-center text-glow uppercase tracking-widest">Simulador de Proximidad a Agujero Negro</h1>
+    <div className="flex flex-row h-screen bg-black text-cyan-300 font-orbitron overflow-hidden">
+      {/* Left Panel Container */}
+      <div className="w-2/5 h-screen overflow-y-auto bg-gray-900 bg-opacity-95 border-r-2 border-cyan-600 border-glow p-3 md:p-4">
+        <ControlPanel
+          simulationState={simulationState}
+          bluetoothStatus={bluetoothStatus}
+          sensorDistance={sensorDistance}
+          onConnect={handleConnect}
+          onDisconnect={handleDisconnect}
+          isConnected={!!esp32Device}
+          error={error}
+          horizonReachedMessageVisible={horizonReachedMessageVisible}
+        />
       </div>
-      <ControlPanel
-        simulationState={simulationState}
-        bluetoothStatus={bluetoothStatus}
-        sensorDistance={sensorDistance}
-        onConnect={handleConnect}
-        onDisconnect={handleDisconnect}
-        isConnected={!!esp32Device}
-        error={error}
-        horizonReachedMessageVisible={horizonReachedMessageVisible}
-      />
+
+      {/* Right Canvas and Title Container */}
+      <div className="w-3/5 h-screen relative">
+         <BlackHoleCanvas
+          distanceToBlackHole={simulationState.distanceToBlackHole}
+          timeDilationFactor={simulationState.timeDilationFactor}
+          maxSimulatedDistanceKm={MAX_SIMULATED_DISTANCE_KM}
+          minSimulatedDistanceKm={MIN_SIMULATED_DISTANCE_KM}
+          spaceshipSpeed={simulationState.spaceshipSpeed}
+          isApproaching={simulationState.isApproaching}
+          showHorizonFlash={showHorizonFlash} 
+        />
+        <div className="absolute top-0 left-0 right-0 p-4 bg-black bg-opacity-50 z-10">
+          <h1 className="text-3xl md:text-4xl text-center text-glow uppercase tracking-widest">Simulador de Proximidad a Agujero Negro</h1>
+        </div>
+      </div>
+      
+       {/* Audio elements remain for global access - Styling unchanged */}
        {/* 
         ==================================================================================================================================
         ||                                                                                                                              ||
