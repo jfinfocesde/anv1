@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { BlackHoleCanvas } from './components/BlackHoleCanvas';
 import { ControlPanel } from './components/ControlPanel';
@@ -419,7 +418,27 @@ const App: React.FC = () => {
        <audio id="ambientDroneSound" src="/sounds/deep_space_drone.mp3" loop></audio>
        <audio id="proximityPulseSound" src="/sounds/proximity_ominous_pulse.mp3"></audio>
        <audio id="timeDilationSound" src="/sounds/time_distortion_field.mp3" loop></audio>
-       <audio id="singularityRumbleSound" src="/sounds/singularity_approach_rumble.mp3" loop></audio>
+       <audio id="singularityRumbleSound" src="/sounds/singularity_approach_rumble.mp3" loop></audio>       <div style={{
+        position: 'fixed',
+        bottom: '15px',
+        right: '15px',
+        color: '#00ffff',
+        fontFamily: '"Orbitron", Arial, sans-serif',
+        fontSize: '14px',
+        opacity: 0.85,
+        textAlign: 'right',
+        pointerEvents: 'none',
+        zIndex: 1000,
+        textShadow: '0 0 10px rgba(0, 255, 255, 0.5)',
+        letterSpacing: '1px',
+        padding: '8px',
+        background: 'rgba(0, 0, 0, 0.3)',
+        borderRadius: '4px',
+        border: '1px solid rgba(0, 255, 255, 0.2)',
+      }}>
+        Proyecto Feria de la Ciencia 2025<br />
+        <span style={{ fontSize: '12px', opacity: 0.9 }}>Por Alejandro Valencia Moreno</span>
+      </div>
     </div>
   );
 };
