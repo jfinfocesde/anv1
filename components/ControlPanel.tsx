@@ -4,12 +4,8 @@ import { MAX_SIMULATED_DISTANCE_KM, MIN_SIMULATED_DISTANCE_KM } from '../constan
 
 interface ControlPanelProps {
   simulationState: SimulationState;
-  bluetoothStatus: string;
-  sensorDistance: number | null;
   onConnect: () => void;
-  onDisconnect: () => void;
   isConnected: boolean;
-  error: string | null;
   horizonReachedMessageVisible: boolean;
 }
 
@@ -41,12 +37,8 @@ const getTimeDilationStyles = (factor: number): { dataFieldClass: string; valueC
 
 export const ControlPanel: React.FC<ControlPanelProps> = ({
   simulationState,
-  bluetoothStatus,
-  sensorDistance,
   onConnect,
-  onDisconnect,
   isConnected,
-  error,
   horizonReachedMessageVisible,
 }) => {
   const { distanceToBlackHole, timeDilationFactor, missionTimeSeconds, shipTimeSeconds } = simulationState;
@@ -84,36 +76,18 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
 
 
   return (
-    <div className="h-full flex flex-col w-full gap-2 p-2"> {/* Reduced padding and gap */}
-      {/* Sistema Section */}
+    <div className="h-full flex flex-col w-full gap-2 p-2">      {/* Sistema Section */}
       <div className="w-full"> 
         <h2 className="text-base text-cyan-400 mb-1 uppercase tracking-wider">SISTEMA</h2>
-        <DataField 
-          label="Bluetooth" 
-          value={bluetoothStatus} 
-          customClass={bluetoothStatus.toLowerCase().includes('error') || bluetoothStatus.toLowerCase().includes('fallo') || bluetoothStatus.toLowerCase().includes('fallida') ? 'border-red-500 w-full' : 'border-glow w-full'}
-          valueClass={bluetoothStatus.toLowerCase().includes('error') || bluetoothStatus.toLowerCase().includes('fallo') || bluetoothStatus.toLowerCase().includes('fallida') ? 'text-red-400' : 'text-glow'}
-        />
-        {isConnected && sensorDistance !== null && (
-          <DataField label="Lectura HC-SR04" value={sensorDistance.toFixed(1)} unit="cm" customClass="w-full" />
-        )}
-        {error && <p className="text-xs text-red-400 mt-1">Error: {error}</p>}
-        {!isConnected ? (
-          <button
-            onClick={onConnect}
-            className="w-full mt-1 px-3 py-1 bg-green-500 hover:bg-green-400 text-black font-bold rounded-md transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-green-300 active:bg-green-600 text-sm"
-            aria-label="Conectar ESP32"
-          >
-            CONECTAR ESP32
-          </button>
-        ) : (
-          <button
-            onClick={onDisconnect}
-            className="w-full mt-1 px-3 py-1 bg-red-500 hover:bg-red-400 text-black font-bold rounded-md transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-red-300 active:bg-red-600 text-sm"
-            aria-label="Desconectar ESP32"
-          >
-            DESCONECTAR
-          </button>
+        {!isConnected && (
+          <div className="flex gap-2">
+            <button
+              onClick={onConnect}
+              className="w-full px-4 py-2 bg-cyan-700 hover:bg-cyan-600 text-white rounded-md transition-colors"
+            >
+              Conectar Dispositivo
+            </button>
+          </div>
         )}
       </div>
 
@@ -123,7 +97,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         <DataField 
           label="Distancia al Event Horizon" 
           value={distanceToBlackHole} 
-          unit="km (Sim.)" 
+          unit="km" 
           customClass={`${isCriticalDistance || horizonReachedMessageVisible ? 'border-red-500' : 'border-glow'} w-full`}
           valueClass={isCriticalDistance || horizonReachedMessageVisible ? 'text-red-400 text-glow-red' : 'text-glow'}
         />

@@ -1,6 +1,4 @@
-
 // ESP32 Bluetooth Service
-// Standard UART service UUIDs often used by ESP32 Bluetooth Serial
 const UART_SERVICE_UUID = '0000ffe0-0000-1000-8000-00805f9b34fb'; 
 const UART_RX_CHARACTERISTIC_UUID = '0000ffe1-0000-1000-8000-00805f9b34fb';
 
@@ -23,7 +21,6 @@ export const connectToESP32 = async (callbacks: ESP32ConnectionCallbacks): Promi
   }
 
   try {
-    console.log('Solicitando dispositivo Bluetooth...');
     const device = await navigator.bluetooth.requestDevice({
       filters: [{ name: 'ESP32_AgujeroNegro' }, { services: [UART_SERVICE_UUID] }],
       optionalServices: [UART_SERVICE_UUID] 
@@ -35,7 +32,6 @@ export const connectToESP32 = async (callbacks: ESP32ConnectionCallbacks): Promi
     }
 
     esp32Device = device;
-    console.log('Conectando al servidor GATT...');
     if (!esp32Device.gatt) {
         callbacks.onError(new Error('Servidor GATT no disponible en este dispositivo.'));
         return;
@@ -44,19 +40,15 @@ export const connectToESP32 = async (callbacks: ESP32ConnectionCallbacks): Promi
     esp32Device.addEventListener('gattserverdisconnected', onDisconnected);
 
     const server = await esp32Device.gatt.connect();
-    console.log('Obteniendo Servicio...');
     const service = await server.getPrimaryService(UART_SERVICE_UUID);
-    console.log('Obteniendo Característica...');
     distanceCharacteristic = await service.getCharacteristic(UART_RX_CHARACTERISTIC_UUID);
 
     await distanceCharacteristic.startNotifications();
     distanceCharacteristic.addEventListener('characteristicvaluechanged', handleDistanceChanged);
     
-    console.log('Conectado y notificaciones iniciadas.');
     callbacks.onConnected(esp32Device);
 
   } catch (error: any) {
-    console.error('Error de conexión Bluetooth:', error);
     callbacks.onError(error);
     esp32Device = null;
     distanceCharacteristic = null;
@@ -64,7 +56,6 @@ export const connectToESP32 = async (callbacks: ESP32ConnectionCallbacks): Promi
 };
 
 const onDisconnected = () => {
-  console.log('Dispositivo desconectado.');
   if (distanceCharacteristic) {
     distanceCharacteristic.removeEventListener('characteristicvaluechanged', handleDistanceChanged);
     distanceCharacteristic = null;
@@ -77,10 +68,8 @@ const onDisconnected = () => {
 
 export const disconnectESP32 = async (): Promise<void> => {
   if (esp32Device && esp32Device.gatt && esp32Device.gatt.connected) {
-    console.log('Desconectando del dispositivo...');
     esp32Device.gatt.disconnect(); 
   } else {
-    console.log('Ningún dispositivo conectado o ya desconectado.');
     if (connectionCallbacks) connectionCallbacks.onDisconnected();
   }
   distanceCharacteristic = null; 
